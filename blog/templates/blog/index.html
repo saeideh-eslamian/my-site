@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Start Page {% endblock  %}
+
+{% block css-files %}
+    <link rel="stylesheet" href="{% static 'blog/styles/post.css' %}">
+    <link rel="stylesheet" href="{% static 'blog/styles/index.css' %}">
+{% endblock %}
+
+
+{% block body %}
+{% include 'blog/includes/header.html' %}
+<section id="welcome">
+    <header>
+        <img src="{% static 'blog/images/image1.jpg' %}" alt="saeideh, author of this blog ">
+        <h2>SAEIDEH'S BLOG</h2> 
+    </header>
+    <p>welcome to my blog :))))</p>
+</section>
+
+<section id="latest-posts">
+    <h2>MY Latest Post</h2>
+    <ul>
+            {% include 'blog/includes/post.html' %}
+    </ul>
+</section>
+
+<section id="about">
+    <h3> I Am...</h3>
+    <p>this is a summery of my work in last years, I love  progrmming</p>
+    <p>
+        i try become one of the best Developer Programing....
+    </p>
+</section>
+
+{% endblock %}
