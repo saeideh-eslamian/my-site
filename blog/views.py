@@ -1,13 +1,19 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 from .models import Post, Author, Tag
+from django.views import View
 
-
-def index(request):
-    latest_posts = Post.objects.all().order_by("-date")[:3]
-
-    return render(request,'blog/index.html',{
+class indexView(View):
+    def get(self, request):
+        latest_posts = Post.objects.all().order_by('-date')[:3]
+        return render(request,'blog/index.html',{
         'posts':latest_posts})
+
+# def index(request):
+#     latest_posts = Post.objects.all().order_by("-date")[:3]
+
+#     return render(request,'blog/index.html',{
+#         'posts':latest_posts})
 
 def posts(request):
     all_posts = Post.objects.all().order_by('date')
