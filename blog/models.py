@@ -35,3 +35,10 @@ class Post(models.Model):
     class Meta:
         verbose_name_plural = "All Posts"
 
+
+class Comment(models.Model):
+    user_name = models.CharField(max_length=100)
+    user_email = models.EmailField()
+    massage = models.TextField()
+    post = models.ForeignKey(Post, on_delete = models.CASCADE, related_name ='comments')       
+
