@@ -49,6 +49,14 @@ class postsView(ListView):
 #     return render(request,'blog/posts.html',{'all_posts':all_posts})
 
 class  PostDetailView(View):
+
+    def save_for_later(self, request, post_id):
+        stored_post = request.session.get('stored_post')
+        if stored_post is not None:
+            is_save_for_later= post_id in stored_post
+        else:
+            is_save_for_later = False
+
     def get(self, request, slug):
         post = Post.objects.get(slug=slug)
         comment_form = CommentForm()
@@ -56,7 +64,8 @@ class  PostDetailView(View):
             'post': post ,
             'post_tag':post.tag.all(),
             'comment_form': comment_form,
-            'comments' :post.comments.all().order_by('-id')
+            'comments' :post.comments.all().order_by('-id'),
+            'save_for_later': is_save_for_later,
          }
         return render(request, 'blog/post-detail.html', context)
 
@@ -105,3 +114,30 @@ class  PostDetailView(View):
     
 #     post=get_object_or_404(Post,slug=slug) #secund method
 
+class ReadLaterView(View):
+    def get(self, request):
+        stored_post = request.session.get('stored_post')
+        context = {}
+
+        if stored_post is None or len(stored_post) == 0:
+            context['posts'] = []
+            context['has_posts'] = False
+        else:   
+            posts = Post.objects.filter(id__in=stored_post) 
+            context['posts'] = posts
+            context['has_posts'] = True
+
+        return render(request, "blog/stored-posts.html", context)    
+
+    def post(self, request):
+        stored_post = request.session.get('stored_post')
+        if stored_post is None:
+            stored_post = []
+
+        post_id = int(request.POST["post-id"])  
+
+        if post_id not in stored_post:
+            stored_post.append(post_id)
+            request.session['stored_post'] = stored_post
+
+        return HttpResponseRedirect("/")      
