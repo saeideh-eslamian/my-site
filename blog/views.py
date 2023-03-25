@@ -1,8 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
+from django.urls import reverse
 from .models import Post, Author, Tag
 from django.views import View
 from django.views.generic import ListView, DetailView
+from .forms import CommentForm
+from django.http import HttpResponseRedirect
+
 
 
 # class indexView(View):
@@ -44,15 +48,49 @@ class postsView(ListView):
     
 #     return render(request,'blog/posts.html',{'all_posts':all_posts})
 
-class  PostDetailView(DetailView):
-    template_name = 'blog/post-detail.html'
-    model = Post
-    context_object_name = 'post'
+class  PostDetailView(View):
+    def get(self, request, slug):
+        post = Post.objects.get(slug=slug)
+        comment_form = CommentForm()
+        context ={
+            'post': post ,
+            'post_tag':post.tag.all(),
+            'comment_form': comment_form,
+            'comments' :post.comments.all().order_by('-id')
+         }
+        return render(request, 'blog/post-detail.html', context)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['post_tags'] = self.object.tag.all() # object = Post.objects.get(slug=slug)
-        return context
+
+    def post(self, request, slug):
+        comment_form = CommentForm(request.POST) 
+        post = Post.objects.get(slug=slug)
+
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.post = post
+            comment.save()
+            response = reverse("post-detail-url", args=[slug])
+            
+            return HttpResponseRedirect(response)
+        
+        context = {
+            'post': post,
+            'post_tag': post.tag.all(),
+            'comment_form': comment_form, 
+            'comments' :post.comments.all().order_by('-id')
+         }
+        return render(request, 'blog/post-detail.html', context)
+
+# class  PostDetailView(DetailView):
+#     template_name = 'blog/post-detail.html'
+#     model = Post
+#     context_object_name = 'post'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['post_tags'] = self.object.tag.all() # object = Post.objects.get(slug=slug)
+#         context['comment_form'] = CommentForm()
+#         return context
 
 
 # def post_detail(request, slug):

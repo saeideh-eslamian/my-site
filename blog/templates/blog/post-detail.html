@@ -9,6 +9,15 @@
 
 
 {% block body %}
+
+    {% if comment_form.errors %}
+    <div id="alert">
+        <h2>Saving Your comment feiled!</h2>
+        <p>please check comment form below the post and fix it</p>
+        <a href="#comment-form">FIX</a>
+    </div>
+    {% endif %}
+
     <section id="summary">
         <h2>{{post.title|title}}</h2>
         <div>
@@ -28,4 +37,29 @@
     <main>
         {{ post.content|linebreaks }}
     </main>
+    <section id="comments">
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <h3>{{comment.user_name}}</h3>
+                    <p>{{comment.massage|linebreaks}}</p>
+                </li>
+            {%endfor%}
+        </ul>
+    </section>
+
+    <section id='comment-form'>
+        <h2>Your Comment</h2>
+        <form action="{%url "post-detail-url" post.slug%}" method="POST">
+            {% csrf_token %}
+            {% for field in comment_form  %}
+                <div class="form-control {% if field.errors %}invalid{% endif %}">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button> Send </button>
+        </form>
+    </section>
 {% endblock %}
