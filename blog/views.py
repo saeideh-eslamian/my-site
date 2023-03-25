@@ -56,6 +56,7 @@ class  PostDetailView(View):
             is_save_for_later= post_id in stored_post
         else:
             is_save_for_later = False
+        return is_save_for_later
 
     def get(self, request, slug):
         post = Post.objects.get(slug=slug)
@@ -65,7 +66,7 @@ class  PostDetailView(View):
             'post_tag':post.tag.all(),
             'comment_form': comment_form,
             'comments' :post.comments.all().order_by('-id'),
-            'save_for_later': is_save_for_later,
+            'save_for_later': self.save_for_later(request, post.id),
          }
         return render(request, 'blog/post-detail.html', context)
 
@@ -86,7 +87,8 @@ class  PostDetailView(View):
             'post': post,
             'post_tag': post.tag.all(),
             'comment_form': comment_form, 
-            'comments' :post.comments.all().order_by('-id')
+            'comments' :post.comments.all().order_by('-id'),
+            'save_for_later': self.save_for_later(request, post.id),
          }
         return render(request, 'blog/post-detail.html', context)
 
@@ -138,6 +140,8 @@ class ReadLaterView(View):
 
         if post_id not in stored_post:
             stored_post.append(post_id)
-            request.session['stored_post'] = stored_post
+        else:
+            stored_post.remove(post_id) 
+        request.session['stored_post'] = stored_post        
 
         return HttpResponseRedirect("/")      
